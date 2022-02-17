@@ -41,15 +41,45 @@ int main() {
 
 
     // Test binding
-    if (bind(AF_INET, &hint, sizeof(hint)) == -1) 
+    if (bind(listeningSocket, AF_INET, (sockaddr*) &hint, sizeof(hint)) == -1) 
     {
         cerr << "Can't bind to IP/port";
         return -2;
     }
 
 
-    // Mark the socket for listening in
-    // Accept a call
+// @TODO Mark the socket for listeningSocket in
+
+    if (listen(listeningSocket, SOMAXCONN) == -1) // SOMAXCONN is the maximum connections we need to have 
+    {
+        cerr << "Can't listen!";
+        return -3;
+    }
+
+
+// @Todo Accept a call
+
+    sockaddr_in client;
+    socklen_t clientSize = sizeof(client);
+
+    char host[NI_MAXHOST]; // MAXHOST = 1025 --> put host in
+    char svc[NI_MAXSERV];  // MAX SERICES = 32  --> put services in
+
+    int clientSocket = accpet(listeningSocket, (sockaddr*)&client, &clientSize);
+
+    if (clientSocket == -1) 
+    {
+        cerr << "Problem with client connecting!";
+        return -4;
+
+    }
+
+    close(listeningSocket);
+
+    // clean garbage
+    memset(host, 0, NI_MAXHOST);
+    memset(svc, 0, NI_MAXSERV);
+
     //Close the listen socket
     //While receiving display messace, echo message
     // Close socket
