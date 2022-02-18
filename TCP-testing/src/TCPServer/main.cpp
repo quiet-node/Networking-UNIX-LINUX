@@ -27,7 +27,7 @@ int main() {
     }
 
 
-// @TODO Bind the socket to IP port
+//@TODO Bind the socket to IP port
     
     sockaddr_in hint; //sockaddr_in for ipv4, sockaddr_in6 for ipv6 
 
@@ -41,14 +41,14 @@ int main() {
 
 
     // Test binding
-    if (bind(listeningSocket, AF_INET, (sockaddr*) &hint, sizeof(hint)) == -1) 
+    if (bind(listeningSocket, (sockaddr*) &hint, sizeof(hint)) == -1) 
     {
         cerr << "Can't bind to IP/port";
         return -2;
     }
 
 
-// @TODO Mark the socket for listeningSocket in
+//@TODO Mark the socket for listeningSocket in
 
     if (listen(listeningSocket, SOMAXCONN) == -1) // SOMAXCONN is the maximum connections we need to have 
     {
@@ -57,7 +57,7 @@ int main() {
     }
 
 
-// @Todo Accept a call
+//@Todo Accept a call
 
     sockaddr_in client;
     socklen_t clientSize = sizeof(client);
@@ -65,7 +65,7 @@ int main() {
     char host[NI_MAXHOST]; // MAXHOST = 1025 --> put host in
     char svc[NI_MAXSERV];  // MAX SERICES = 32  --> put services in
 
-    int clientSocket = accpet(listeningSocket, (sockaddr*)&client, &clientSize);
+    int clientSocket = accept(listeningSocket, (sockaddr*)&client, &clientSize);
 
     if (clientSocket == -1) 
     {
@@ -74,15 +74,55 @@ int main() {
 
     }
 
+//@Todo Close the listen socket
+
     close(listeningSocket);
 
     // clean garbage
     memset(host, 0, NI_MAXHOST);
     memset(svc, 0, NI_MAXSERV);
 
-    //Close the listen socket
-    //While receiving display messace, echo message
-    // Close socket
+    // get info from client
+    int res = getnameinfo((sockaddr*) &client, sizeof(client), host, NI_MAXHOST, svc, NI_MAXSERV, 0);
+
+    if (res) 
+    {
+        cout << host << " connected on " << svc << endl;
+    } else // if res is not valid, do things manually 
+    {
+        inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST); //opposite of inet_pton
+        cout << host << " connected on " << ntohs(client.sin_port) << endl;
+    }
+
+//@TODO While receiving display messace, echo message
+    char buf[4096];
+    while(true)
+    {
+        // Clear the buffer
+        memset(buf, 0, 4096);
+        // Wait for a message
+        int bytesRecv = recv(clientSocket, buf, 4096, 0);
+        if (bytesRecv == -1) 
+        {
+            cerr << "There was a connection issue" << endl;
+            break;
+        }
+
+        if (bytesRecv == 0) 
+        {
+            cout << "The client disconnected" << endl;
+            break;
+        }
+
+        // Display message
+        cout << "Received; " << string(buf, 0 , bytesRecv) << endl;
+
+        // Resend message
+        send(clientSocket, buf, bytesRecv + 1, 0); 
+    }
+
+//@TODO Close socket
+    close(clientSocket);
 
     return 0;
 }
