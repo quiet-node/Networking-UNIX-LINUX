@@ -24,7 +24,9 @@ int main()
 
     sockaddr_in hint;
     hint.sin_family = AF_INET;
-    hint.sin_port = htons(port);
+    hint.sin_port = htons(port); // same port with TCP server
+    
+    // converts presentation format address to network format
     inet_pton(AF_INET, ipAddress.c_str(), &hint.sin_addr);
 
     //	Connect to the server on the socket
