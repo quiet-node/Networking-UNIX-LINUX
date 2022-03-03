@@ -8,3 +8,6 @@
 
 - Connect to server
   `telnet localhost 54000`
+  
+  or by client
+  
