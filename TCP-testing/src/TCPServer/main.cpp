@@ -56,6 +56,8 @@ int main() {
         return -3;
     }
 
+    puts("Conntected!\n");
+
 
 //@Todo Accept a call
 
@@ -66,6 +68,7 @@ int main() {
     char svc[NI_MAXSERV];  // MAX SERICES = 32  --> put services in
 
     int clientSocket = accept(listeningSocket, (sockaddr*)&client, &clientSize);
+    // int clientSocket = accept(listeningSocket, (sockaddr*)&client, &clientSize);
 
     if (clientSocket == -1) 
     {
@@ -79,8 +82,9 @@ int main() {
     close(listeningSocket);
 
     // clean garbage
-    memset(host, 0, NI_MAXHOST);
+    memset(host, 0, NI_MAXHOST); // memset copies all "0" to NI_MAXHOST spots in host, basically fill host with NI_MAXHOST 0s
     memset(svc, 0, NI_MAXSERV);
+
 
     // get info from client
     int res = getnameinfo((sockaddr*) &client, sizeof(client), host, NI_MAXHOST, svc, NI_MAXSERV, 0);
@@ -96,6 +100,8 @@ int main() {
 
 //@TODO While receiving display messace, echo message
     char buf[4096];
+    char chunk[4096];
+
     while(true)
     {
         // Clear the buffer
@@ -115,7 +121,7 @@ int main() {
         }
 
         // Display message
-        cout << "Received; " << string(buf, 0 , bytesRecv) << endl;
+        cout << "Received: " << string(buf, 0 , bytesRecv) << endl;
 
         // Resend message
         send(clientSocket, buf, bytesRecv + 1, 0); 
